@@ -1,0 +1,13 @@
+[
+  {
+    "text": "Node.js is a runtime.",
+    "embedding": [
+      1,
+      2,
+      3
+    ],
+    "metadata": {
+      "url": "https://example.com"
+    }
+  }
+]
