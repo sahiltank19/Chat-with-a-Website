@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const { ChromaClient } = require("chromadb");
 
 const client = new ChromaClient();
@@ -16,32 +17,26 @@ async function getCollection() {
     }
 }
 
-async function insertDocuments(documents) {
+async function addDocuments(documents) {
     const collection = await getCollection();
 
     await collection.add({
-        ids: documents.map((doc, index) => doc.id || `doc-${Date.now()}-${index}`),
+        ids: documents.map((_, i) => crypto.randomUUID()),
+
         documents: documents.map(doc => doc.pageContent),
+
         embeddings: documents.map(doc => doc.embedding),
+
         metadatas: documents.map(doc => ({
             url: doc.metadata.url,
             title: doc.metadata.title,
         })),
     });
-}
-async function searchDocuments(queryEmbedding, limit = 5) {
-    const collection = await getCollection();
 
-    const results = await collection.query({
-        queryEmbeddings: [queryEmbedding],
-        nResults: limit,
-    });
-
-    return results;
+    return true;
 }
 
 module.exports = {
-    insertDocuments,
     getCollection,
-    searchDocuments,
+    addDocuments,
 };
