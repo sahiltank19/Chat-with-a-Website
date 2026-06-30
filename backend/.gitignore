@@ -1,7 +1,19 @@
-node_modules
+# Dependencies
+node_modules/
 
+# Environment
 .env
 
-chroma_db
+# Logs
+*.log
+npm-debug.log*
 
-uploads
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+
+# Chroma persistent data (if used later)
+chroma_data/
