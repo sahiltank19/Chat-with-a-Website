@@ -9,7 +9,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies (skipping devDependencies like nodemon)
-RUN npm ci --only=production
+RUN npm ci 
 
 # Copy application source code
 COPY . .
