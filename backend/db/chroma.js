@@ -1,8 +1,9 @@
 const crypto = require("crypto");
 const { ChromaClient } = require("chromadb");
 
-const client = new ChromaClient();
-
+const client = new ChromaClient({
+  path: process.env.CHROMA_URL,
+});
 const COLLECTION_NAME = "website_documents";
 
 /**
@@ -29,25 +30,25 @@ async function getCollection() {
 
 
 async function addDocuments(documents) {
-    const collection = await getCollection();
+  const collection = await getCollection();
 
-    await collection.add({
-        ids: documents.map((_, i) => crypto.randomUUID()),
+  await collection.add({
+    ids: documents.map((_, i) => crypto.randomUUID()),
 
-        documents: documents.map(doc => doc.pageContent),
+    documents: documents.map(doc => doc.pageContent),
 
-        embeddings: documents.map(doc => doc.embedding),
+    embeddings: documents.map(doc => doc.embedding),
 
-        metadatas: documents.map(doc => ({
-            url: doc.metadata.url,
-            title: doc.metadata.title,
-        })),
-    });
+    metadatas: documents.map(doc => ({
+      url: doc.metadata.url,
+      title: doc.metadata.title,
+    })),
+  });
 
-    return true;
+  return true;
 }
 
 module.exports = {
-    getCollection,
-    addDocuments,
+  getCollection,
+  addDocuments,
 };
