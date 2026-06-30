@@ -16,9 +16,29 @@ const NOOP_EMBEDDING_FN = {
 };
 
 /* -----------------------------
+   WAIT FOR CHROMA TO WAKE UP
+   (Handles Render free-tier cold starts — up to ~60s wait)
+------------------------------*/
+async function waitForChroma(retries = 12, delayMs = 5000) {
+  for (let i = 1; i <= retries; i++) {
+    try {
+      await client.heartbeat();
+      console.log(`[ChromaDB] Connected on attempt ${i}`);
+      return;
+    } catch (err) {
+      console.log(`[ChromaDB] Not ready yet (attempt ${i}/${retries}), retrying in ${delayMs / 1000}s...`);
+      await new Promise((r) => setTimeout(r, delayMs));
+    }
+  }
+  throw new Error("ChromaDB did not become ready in time.");
+}
+
+
+/* -----------------------------
    GET OR CREATE COLLECTION
 ------------------------------*/
 async function getCollection() {
+  await waitForChroma();
   try {
     return await client.getCollection({
       name: COLLECTION_NAME,
