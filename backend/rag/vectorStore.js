@@ -1,7 +1,10 @@
 const { ChromaClient } = require("chromadb");
 
+const CHROMA_URL = process.env.CHROMA_URL || "http://localhost:8000";
+console.log(`[ChromaDB] Using CHROMA_URL: ${CHROMA_URL}`);
+
 const client = new ChromaClient({
-  path: process.env.CHROMA_URL || "http://localhost:8000"
+  path: CHROMA_URL
 });
 
 const COLLECTION_NAME = "website_documents";
@@ -17,20 +20,37 @@ const NOOP_EMBEDDING_FN = {
 
 /* -----------------------------
    WAIT FOR CHROMA TO WAKE UP
-   (Handles Render free-tier cold starts — up to ~60s wait)
+   Uses a raw HTTP fetch to ping the server, which works with ANY server version.
+   Waits up to 2.5 minutes (30 retries × 5s) to handle Render free-tier cold starts.
 ------------------------------*/
-async function waitForChroma(retries = 12, delayMs = 5000) {
+async function waitForChroma(retries = 30, delayMs = 5000) {
+  // Try both v1 and v2 heartbeat endpoints (covers all server versions)
+  const endpoints = [
+    `${CHROMA_URL}/api/v1/heartbeat`,
+    `${CHROMA_URL}/api/v2/heartbeat`,
+  ];
+
   for (let i = 1; i <= retries; i++) {
-    try {
-      await client.heartbeat();
-      console.log(`[ChromaDB] Connected on attempt ${i}`);
-      return;
-    } catch (err) {
-      console.log(`[ChromaDB] Not ready yet (attempt ${i}/${retries}), retrying in ${delayMs / 1000}s...`);
-      await new Promise((r) => setTimeout(r, delayMs));
+    for (const url of endpoints) {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout per attempt
+        const res = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeout);
+        if (res.ok || res.status === 404 || res.status === 410) {
+          // Any HTTP response (including 404/410) means the server IS alive
+          console.log(`[ChromaDB] Server is alive (attempt ${i}, status: ${res.status}, url: ${url})`);
+          return;
+        }
+        console.log(`[ChromaDB] Unexpected status ${res.status} from ${url}`);
+      } catch (err) {
+        console.log(`[ChromaDB] Fetch failed for ${url}: ${err.message}`);
+      }
     }
+    console.log(`[ChromaDB] Not ready yet (attempt ${i}/${retries}), retrying in ${delayMs / 1000}s...`);
+    await new Promise((r) => setTimeout(r, delayMs));
   }
-  throw new Error("ChromaDB did not become ready in time.");
+  throw new Error(`ChromaDB at ${CHROMA_URL} did not become ready in time.`);
 }
 
 
