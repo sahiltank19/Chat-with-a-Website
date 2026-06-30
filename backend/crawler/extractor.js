@@ -6,7 +6,9 @@ function extractContent(html) {
 
     // Remove unwanted elements
     $(
-        "script, style, noscript, iframe, svg, canvas, footer, nav, header, aside, form"
+        "script, style, noscript, iframe, svg, canvas, footer, nav, header, aside, form, " +
+        ".cookie-banner, .cookie-consent, #cookie-banner, #cookie-consent, " +
+        ".gdpr-banner, .gdpr-consent, #gdpr-consent, [class*='cookie-'], [id*='cookie-']"
     ).remove();
 
     const title = $("title").first().text().trim();

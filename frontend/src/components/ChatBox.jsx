@@ -48,7 +48,8 @@ function ChatBox() {
       ]);
     } catch (err) {
       const msg = err.response?.data?.message || "Something went wrong. Please try again.";
-      setChatError(msg);
+      const isLimit = err.response?.status === 429;
+      setChatError({ message: msg, isRateLimit: isLimit });
     } finally {
       setIsLoading(false);
       // Re-focus input for quick follow-up questions
@@ -90,8 +91,8 @@ function ChatBox() {
         )}
 
         {chatError && (
-          <div className="chatbox__error" role="alert">
-            ⚠️ {chatError}
+          <div className={`chatbox__error ${chatError.isRateLimit ? "chatbox__error--rate_limit" : ""}`} role="alert">
+            ⚠️ {chatError.message}
           </div>
         )}
 

@@ -9,11 +9,22 @@ const CONCURRENCY   = 3;    // Number of concurrent page crawl workers
 
 async function crawlWebsite(startUrl) {
 
+  let cleanStartUrl = startUrl.trim();
+  if (!/^https?:\/\//i.test(cleanStartUrl)) {
+    cleanStartUrl = "https://" + cleanStartUrl;
+  }
+
   let parsedUrl;
   try {
-    parsedUrl = new URL(startUrl);
+    parsedUrl = new URL(cleanStartUrl);
   } catch {
     throw new Error(`Invalid URL: "${startUrl}"`);
+  }
+
+  // Normalize by stripping trailing slash
+  let normalizedStartUrl = parsedUrl.toString();
+  if (normalizedStartUrl.endsWith("/")) {
+    normalizedStartUrl = normalizedStartUrl.slice(0, -1);
   }
 
   const baseDomain = parsedUrl.hostname;
@@ -30,8 +41,8 @@ async function crawlWebsite(startUrl) {
   };
 
   // Mark as visited immediately when enqueued to prevent duplicate queuing
-  queue.enqueue({ url: startUrl, depth: 0 });
-  visited.add(startUrl);
+  queue.enqueue({ url: normalizedStartUrl, depth: 0 });
+  visited.add(normalizedStartUrl);
 
   console.log(`[Crawler] Starting — domain: ${baseDomain}, limit: ${MAX_PAGES} pages, concurrency: ${CONCURRENCY}`);
 
@@ -88,10 +99,14 @@ async function crawlWebsite(startUrl) {
 
     if (error) {
       // Propagate errors from the main entry URL immediately so the client gets a specific warning
-      if (taskObj.current.url === startUrl) {
+      if (taskObj.current.url === normalizedStartUrl) {
         throw error;
       }
-      statistics.errors++;
+      if (error.message === "ROBOTS_TXT_DISALLOWED") {
+        statistics.robotsBlocked++;
+      } else {
+        statistics.errors++;
+      }
       continue;
     }
 
