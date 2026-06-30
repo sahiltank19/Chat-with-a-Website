@@ -5,17 +5,28 @@ const client = new ChromaClient();
 
 const COLLECTION_NAME = "website_documents";
 
+/**
+ * ChromaDB v3 requires an embeddingFunction on every getCollection / createCollection call.
+ * We supply embeddings directly in add() calls, so this stub is never invoked.
+ */
+const NOOP_EMBEDDING_FN = {
+  generate: async (texts) => texts.map(() => []),
+};
+
 async function getCollection() {
-    try {
-        return await client.getCollection({
-            name: COLLECTION_NAME,
-        });
-    } catch {
-        return await client.createCollection({
-            name: COLLECTION_NAME,
-        });
-    }
+  try {
+    return await client.getCollection({
+      name: COLLECTION_NAME,
+      embeddingFunction: NOOP_EMBEDDING_FN,
+    });
+  } catch {
+    return await client.createCollection({
+      name: COLLECTION_NAME,
+      embeddingFunction: NOOP_EMBEDDING_FN,
+    });
+  }
 }
+
 
 async function addDocuments(documents) {
     const collection = await getCollection();

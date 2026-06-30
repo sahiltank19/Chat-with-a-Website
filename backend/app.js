@@ -1,22 +1,26 @@
 const express = require("express");
-const cors = require("cors");
+const cors    = require("cors");
 
-const crawlRoutes = require("./routes/crawlRoutes");
-const chatRoutes = require("./routes/chatRoutes");
+const crawlRoutes  = require("./routes/crawlRoutes");
+const chatRoutes   = require("./routes/chatRoutes");
+const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
 
-// Middleware
+// ── Middleware ────────────────────────────────────────────────────────────────
 app.use(cors());
 app.use(express.json());
 
-// Health Check
+// ── Health Check ──────────────────────────────────────────────────────────────
 app.get("/", (req, res) => {
-    res.send("Website Chat RAG Backend Running...");
+  res.json({ status: "ok", message: "Website Chat RAG Backend Running." });
 });
 
-// Routes
+// ── Routes ────────────────────────────────────────────────────────────────────
 app.use("/api/crawl", crawlRoutes);
-app.use("/api/chat", chatRoutes);
+app.use("/api/chat",  chatRoutes);
+
+// ── Centralised Error Handler (must be last) ──────────────────────────────────
+app.use(errorHandler);
 
 module.exports = app;

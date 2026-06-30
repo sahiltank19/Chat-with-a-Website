@@ -1,184 +1,246 @@
-.counter {
-  font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
+/* ================================================================
+   App Layout — Chat with a Website
+   Page-level and component-level layout styles.
+   All design tokens are in index.css.
+   ================================================================ */
 
-  &:hover {
-    border-color: var(--accent-border);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-}
-
-.hero {
-  position: relative;
-
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
-  }
-
-  .base {
-    width: 170px;
-    position: relative;
-    z-index: 0;
-  }
-
-  .framework,
-  .vite {
-    position: absolute;
-  }
-
-  .framework {
-    z-index: 1;
-    top: 34px;
-    height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
-  }
-
-  .vite {
-    z-index: 0;
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
-  }
-}
-
-#center {
+/* ── Home page ──────────────────────────────────────────────────── */
+.home {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 56px 24px 80px;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 25px;
-  place-content: center;
-  place-items: center;
-  flex-grow: 1;
-
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
+  gap: 40px;
 }
 
-#next-steps {
+.home__header {
+  text-align: center;
+}
+
+.home__logo-container {
   display: flex;
-  border-top: 1px solid var(--border);
-  text-align: left;
-
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
-  }
-
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
+  justify-content: center;
+  margin-bottom: 28px;
 }
 
-#docs {
-  border-right: 1px solid var(--border);
-
-  @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
+.home__logo {
+  height: 140px;
+  width: auto;
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-#next-steps ul {
-  list-style: none;
-  padding: 0;
+.home__logo:hover {
+  transform: scale(1.06) rotate(1deg);
+}
+
+
+.home__title {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-weight: 700;
+  letter-spacing: -1px;
+  background: linear-gradient(135deg, #e8eaf5 0%, #9f67f5 60%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 12px;
+}
+
+.home__subtitle {
+  font-size: 17px;
+  color: var(--text-muted);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* Stages */
+.home__stage {
   display: flex;
-  gap: 8px;
-  margin: 32px 0 0;
-
-  .logo {
-    height: 18px;
-  }
-
-  a {
-    color: var(--text-h);
-    font-size: 16px;
-    border-radius: 6px;
-    background: var(--social-bg);
-    display: flex;
-    padding: 6px 12px;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: box-shadow 0.3s;
-
-    &:hover {
-      box-shadow: var(--shadow);
-    }
-    .button-icon {
-      height: 18px;
-      width: 18px;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
-
-    a {
-      width: 100%;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-  }
-}
-
-#spacer {
-  height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
-  }
-}
-
-.ticks {
-  position: relative;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
   width: 100%;
+}
 
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: -4.5px;
-    border: 5px solid transparent;
-  }
+/* Empty-state hint */
+.home__hint {
+  font-size: 14px;
+  color: var(--text-muted);
+  text-align: center;
+}
 
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
-  }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
-  }
+/* ── Crawl Form ─────────────────────────────────────────────────── */
+.crawl-form {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 620px;
+}
+
+.crawl-form__input { flex: 1; }   /* width: 100% is set by the global input rule */
+
+/* ── Stats Card ─────────────────────────────────────────────────── */
+.stats-card {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 24px 28px;
+  /* Subtle green top border to signal success */
+  border-top: 3px solid var(--success);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.stats-card__title {
+  font-size: 17px;
+  color: var(--success);
+}
+
+.stats-card__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-muted);
+  border-radius: var(--r-md);
+}
+
+.stat__value {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--accent-hover);
+}
+
+.stat__label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+/* ── ChatBox ────────────────────────────────────────────────────── */
+.chatbox {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 560px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+/* Message list */
+.chatbox__messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Empty state */
+.chatbox__empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--text-muted);
+  font-size: 15px;
+  text-align: center;
+}
+
+.chatbox__empty-icon {
+  font-size: 36px;
+  opacity: 0.5;
+}
+
+/* Per-message group (bubble + sources) */
+.chatbox__message-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Error banner */
+.chatbox__error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  border-radius: var(--r-md);
+  color: var(--error);
+  font-size: 14px;
+}
+
+/* Rate-limit variant — amber instead of red */
+.chatbox__error--rate_limit {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #f59e0b;
+}
+
+/* Live countdown badge */
+.chatbox__countdown {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 99px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+
+/* Input bar */
+.chatbox__form {
+  display: flex;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+  flex-shrink: 0;
+}
+
+.chatbox__input { flex: 1; }
+
+.chatbox__submit {
+  /* Inherits .btn-primary styles from index.css */
+  padding: 12px 18px;
+  font-size: 14px;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .home      { padding: 32px 16px 60px; gap: 28px; }
+  .crawl-form { flex-direction: column; }
+
+  .stats-card__grid { grid-template-columns: repeat(2, 1fr); }
+
+  .chatbox   { height: 480px; }
+
+  .message__bubble { max-width: 88%; }
+  .source-list     { margin-left: 0; }
 }

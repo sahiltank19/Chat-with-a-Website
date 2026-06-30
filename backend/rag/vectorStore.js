@@ -4,6 +4,15 @@ const client = new ChromaClient();
 
 const COLLECTION_NAME = "website_documents";
 
+/**
+ * ChromaDB v3 requires an embeddingFunction on every getCollection / createCollection call.
+ * We provide our own precomputed Gemini embeddings directly in add() and query(),
+ * so this stub is registered but never actually invoked.
+ */
+const NOOP_EMBEDDING_FN = {
+  generate: async (texts) => texts.map(() => []),
+};
+
 /* -----------------------------
    GET OR CREATE COLLECTION
 ------------------------------*/
@@ -11,10 +20,12 @@ async function getCollection() {
   try {
     return await client.getCollection({
       name: COLLECTION_NAME,
+      embeddingFunction: NOOP_EMBEDDING_FN,
     });
   } catch (err) {
     return await client.createCollection({
       name: COLLECTION_NAME,
+      embeddingFunction: NOOP_EMBEDDING_FN,
     });
   }
 }
@@ -44,24 +55,32 @@ async function clearCollection() {
    INSERT DOCUMENTS
 ------------------------------*/
 async function insertDocuments(documents) {
+
+  // Guard: ChromaDB v3 hard-rejects empty embedding arrays.
+  // indexer.js already filters these, but we add a second check here.
+  const valid = documents.filter(
+    doc => Array.isArray(doc.embedding) && doc.embedding.length > 0
+  );
+
+  if (valid.length === 0) {
+    throw new Error("insertDocuments received no documents with valid embeddings.");
+  }
+
   const collection = await getCollection();
 
   await collection.add({
-    ids: documents.map(
+    ids: valid.map(
       (doc, index) => doc.id || `doc-${Date.now()}-${index}-${Math.random()}`
     ),
-
-    documents: documents.map(doc => doc.pageContent || ""),
-
-    // ⚠️ only include embeddings if they exist
-    embeddings: documents.map(doc => doc.embedding || []),
-
-    metadatas: documents.map(doc => ({
-      url: doc.metadata?.url || "",
+    documents: valid.map(doc => doc.pageContent || ""),
+    embeddings: valid.map(doc => doc.embedding),       // guaranteed non-empty
+    metadatas:  valid.map(doc => ({
+      url:   doc.metadata?.url   || "",
       title: doc.metadata?.title || "",
     })),
   });
 }
+
 
 /* -----------------------------
    SEARCH

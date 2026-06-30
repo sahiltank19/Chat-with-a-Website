@@ -1,49 +1,56 @@
 import { useState } from "react";
 import api from "../services/api";
 
-function CrawlForm({ onCrawlSuccess }) {
+/**
+ * CrawlForm — URL input and submit button.
+ * Props:
+ *   onCrawlStart   {() => void}              Called right before the API request fires.
+ *   onCrawlSuccess {(data: object) => void}  Called with the full Axios response body on success.
+ *   onCrawlError   {(msg: string) => void}   Called with an error message on failure.
+ *   disabled       {boolean}                 Disables form while parent is busy.
+ */
+function CrawlForm({ onCrawlStart, onCrawlSuccess, onCrawlError, disabled }) {
   const [url, setUrl] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const handleCrawl = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    const trimmed = url.trim();
+    if (!trimmed) return;
 
-    if (!url.trim()) {
-      alert("Please enter a website URL.");
-      return;
-    }
+    onCrawlStart?.();
 
     try {
-      setLoading(true);
-
-      const { data } = await api.post("/crawl", {
-        url,
-      });
-
-      onCrawlSuccess(data);
-    } catch (error) {
-      alert(error.response?.data?.message || "Crawl failed");
-    } finally {
-      setLoading(false);
+      const { data } = await api.post("/crawl", { url: trimmed });
+      onCrawlSuccess?.(data);
+    } catch (err) {
+      const message =
+        err.response?.data?.message || "Crawl failed. Please check the URL and try again.";
+      onCrawlError?.(message);
     }
   };
 
   return (
-    <form onSubmit={handleCrawl}>
-
+    <form className="crawl-form" onSubmit={handleSubmit} noValidate>
       <input
-        type="text"
+        className="crawl-form__input"
+        id="crawl-url"
+        type="url"
         placeholder="https://example.com"
         value={url}
         onChange={(e) => setUrl(e.target.value)}
+        disabled={disabled}
+        required
+        aria-label="Website URL"
       />
-
-      <button type="submit" disabled={loading}>
-        {loading ? "Crawling..." : "Crawl Website"}
+      <button
+        className="btn-primary"
+        type="submit"
+        disabled={disabled || !url.trim()}
+      >
+        {disabled ? "Crawling…" : "Crawl Website"}
       </button>
-
     </form>
   );
 }
 
-export default CrawlForm;
+export default CrawlForm;
